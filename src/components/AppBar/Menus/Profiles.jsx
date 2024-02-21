@@ -31,7 +31,7 @@ function Profiles() {
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                 >
-                    <Avatar sx={{ width: 30, height: 30 }}
+                    <Avatar sx={{ width: 34, height: 34 }}
                     src="https://avatars.githubusercontent.com/u/139653151?s=400&u=23774049c98d44f43f9b5fc39414aacc5405c25b&v=4"
                     alt='Krisly8386'
                     />
