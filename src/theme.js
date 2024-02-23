@@ -1,5 +1,4 @@
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
-import { deepOrange, orange, teal, cyan } from '@mui/material/colors'
 
 // Create a theme instance.
 const theme = extendTheme({
@@ -8,79 +7,55 @@ const theme = extendTheme({
       boardBardHeight: '60px'
     },
     colorSchemes: {
-      light: {
-        palette: {
-          primary: teal,
-          secondary: deepOrange
-        }
-      },
-      dark: {
-        palette: {
-          primary: cyan,
-          secondary: orange
-        }
-      }
+      light: {},
+      dark: {}
     },
-    // ...other properties
     components: {
-      // Name of the component
-      MuiCssBaseline:{
-        styleOverrides:{
+      MuiCssBaseline: {
+        styleOverrides: {
           body: {
-            '*::-webkit-scrollbar':{
+            '*::-webkit-scrollbar': {
               width: '8px',
               height: '8px'
             },
-            '*::-webkit-scrollbar-thumb':{
-              backgroundColor: '#bdc3c7',
+            '*::-webkit-scrollbar-thumb': {
+              backgroundColor: '#dcdde1',
               borderRadius: '8px'
             },
-            '*::-webkit-scrollbar-thumb:hover':{
-              backgroundColor: '#00b894',
-              borderRadius: '8px'
+            '*::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: 'white'
             }
           }
         }
       },
       MuiButton: {
         styleOverrides: {
-          // Name of the slot
           root: {
-            // Some CSS
             textTransform: 'none',
+            borderWidth: '0.5px',
+            '&:hover': { borderWidth: '0.5px' }
           }
         }
       },
       MuiInputLabel: {
         styleOverrides: {
-          // Name of the slot
-          root:({theme})=>{
-            return {
-              color: theme.palette.primary.main,
-              fontSize: '0.875rem'
-            }
+          root: { fontSize: '0.875rem' }
+        }
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            '&.MuiTypography-body1': { fontSize: '0.875rem' }
           }
         }
       },
-      MuiOutlinedInput:{
+      MuiOutlinedInput: {
         styleOverrides: {
-          // Name of the slot
-          root: ({theme})=>{
-            return {
-              color: theme.palette.primary.main,
-              fontSize: '0.875rem',
-              '.MuiOutlinedInput-notchedOutline': {
-                borderColor: theme.palette.primary.light
-              },
-              '&:hover': {
-                '.MuiOutlinedInput-notchedOutline':{
-                  borderColor: theme.palette.primary.main
-                } 
-              },
-              '& fieldset': {
-                borderWidth: '1px !important', 
-              }
-            }
+          root: {
+            fontSize: '0.875rem',
+            '& fieldset': { borderWidth: '0.5px' },
+            '&:hover fieldset': { borderWidth: '1px' },
+            '&.Mui-focused fieldset': { borderWidth: '1px' }
           }
         }
       }
