@@ -2,12 +2,12 @@ import Box  from '@mui/material/Box'
 import Column from './Column/Column'
 import Button from '@mui/material/Button'
 import NoteAddIcon from '@mui/icons-material/NoteAdd'
-
+import {SortableContext, horizontalListSortingStrategy} from '@dnd-kit/sortable'
 
 function ListColumns({columns}) {
-
   return (
-    <Box 
+    <SortableContext items={columns?.map(c=>c._id)} strategy={horizontalListSortingStrategy}>
+      <Box 
     sx={{
         bgcolor: 'inherit',
         display: 'flex',
@@ -44,7 +44,8 @@ function ListColumns({columns}) {
         >Add new column</Button>
       </Box>
 
-    </Box> 
+      </Box> 
+    </SortableContext>
   )
 }
 
