@@ -22,14 +22,17 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 function Column({column}) {
-    const { attributes, listeners, setNodeRef, transform, transition} = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
       id: column._id, 
       data: {...column}
     })
     const dndKitColumnStyles = {
       // touchAction: 'none',
       transform: CSS.Translate.toString(transform),
-      transition
+      transition,
+      //Fix the issue of needing to drag in the middle of the long column to move. Used along with {...listeners} inserted in <Box> not <dev>
+      height: '100%',
+      opacity: isDragging? 0.5: undefined
     }
 
     const [anchorEl, setAnchorEl] = useState(null)
@@ -40,11 +43,10 @@ function Column({column}) {
     const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
 
   return (
+    <div         
+      ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
       <Box
-        ref={setNodeRef} 
-        style={dndKitColumnStyles}
-        {...attributes} 
-        {...listeners}
+         {...listeners}
         sx={{
           minWidth:'300px',
           maxWidth: '300px',
@@ -140,6 +142,8 @@ function Column({column}) {
             </Tooltip>
           </Box>          
       </Box> 
+    </div>
+     
   )
 }
 
