@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import Box  from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
@@ -17,6 +18,7 @@ import {
 import { cloneDeep, isEmpty } from 'lodash'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
+import { generatePlaceholderCard } from '~/utils/formatters'
 
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
@@ -58,6 +60,7 @@ function BoardContent({board}) {
 
   //Last collision point
   const lastOverId = useRef(null)
+
   useEffect(()=>{
     setOrderedColumns( mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   },[board])
@@ -101,6 +104,10 @@ function BoardContent({board}) {
         //Delete old card from the old column
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId)
 
+        //if this is the last card to be dragged from this column, enable the placeholder.
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
         //Update cardOrderIds for old column
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
@@ -118,6 +125,9 @@ function BoardContent({board}) {
 
         //Add the dragged card to the new over column
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+
+        //Remove the card place holder to secure backend performance as placeholder card is not saved in the database.
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
 
         //Update cardOrderIds for new column
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)

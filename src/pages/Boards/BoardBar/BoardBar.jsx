@@ -10,7 +10,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import { Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { capitalizeFirstLetter } from '~/utils/formaters'
+import { capitalizeFirstLetter } from '~/utils/formatters'
 
 const MENU_STYLE = {
     color: 'white',
