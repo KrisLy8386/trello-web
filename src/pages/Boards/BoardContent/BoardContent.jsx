@@ -10,10 +10,12 @@ import {
   useSensors,
   defaultDropAnimationSideEffects,
   DragOverlay,
+  pointerWithin,
+  getFirstCollision,
   closestCorners} from '@dnd-kit/core'
 
 import { cloneDeep, isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 
 import Column from './ListColumns/Column/Column'
@@ -54,6 +56,8 @@ function BoardContent({board}) {
   const [activeDragItemData, setActiveDragItemData] = useState(null)
   const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] = useState(null)
 
+  //Last collision point
+  const lastOverId = useRef(null)
   useEffect(()=>{
     setOrderedColumns( mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   },[board])
@@ -273,11 +277,52 @@ function BoardContent({board}) {
     sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } })
   }
 
+  const collisionDetectionStrategy = useCallback((args) => {
+    // In the case of dragging columns, using closestCorners would be the best choice.
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      return closestCorners({ ...args })
+    }
+
+    // Keep track of the collision points and return.
+    const pointerIntersections = pointerWithin(args)
+
+    // Fix the issue of fliclering by using DND-kit in this case:
+    // -Dragging a card containing big cover image and dragging to the top to excape out of the dragging scope
+    if (!pointerIntersections?.length) return
+
+    // const intersections = !!pointerIntersections?.length
+    //   ? pointerIntersections
+    //   : rectIntersection(args)
+
+    // Look for the first overID in this pointerIntersections above
+    let overId = getFirstCollision(pointerIntersections, 'id')
+    if (overId) {
+      // This section of code is to fix the bug flickering. This could be ommited but this improves the performance significantly.
+      const checkColumn = orderedColumns.find(column => column._id === overId)
+      if (checkColumn) {
+        // console.log('overId before: ', overId)
+        overId = closestCorners({
+          ...args,
+          droppableContainers: args.droppableContainers.filter(container => {
+            return (container.id !== overId) && (checkColumn?.cardOrderIds?.includes(container.id))
+          })
+        })[0]?.id
+        // console.log('overId after: ', overId)
+      }
+
+      lastOverId.current = overId
+      return [{ id: overId }]
+    }
+
+    //If overID is null, return empty array to prevent page from crashing. 
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
+  }, [activeDragItemType, orderedColumns])
+
   return (
     <DndContext 
       sensors={sensors}
       //closetCorner is used here in order to detect the card with higher length as this could be easily confused with column.
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}>
