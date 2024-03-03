@@ -9,7 +9,8 @@ import {
   useSensor,
   useSensors,
   defaultDropAnimationSideEffects,
-  DragOverlay} from '@dnd-kit/core'
+  DragOverlay,
+  closestCorners} from '@dnd-kit/core'
 
 import { cloneDeep, isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
@@ -186,6 +187,8 @@ function BoardContent({board}) {
   return (
     <DndContext 
       sensors={sensors}
+      //closetCorner is used here in order to detect the card with higher length as this could be easily confused with column.
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}>
