@@ -196,7 +196,7 @@ function BoardContent({board}) {
           targetColumn.cards = dndOrderedCards
           targetColumn.cardOrderIds = dndOrderedCardIds
 
-          // Trả về giá trị state mới (chuẩn vị trí)
+          // Return new states
           return nextColumns
         })
 
