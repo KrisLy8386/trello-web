@@ -24,8 +24,9 @@ import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'react-toastify'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
+import { useConfirm } from 'material-ui-confirm'
 
-function Column({column}) {
+function Column({column, createNewCard, deleteColumnDetails}) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
       id: column._id, 
       data: {...column}
@@ -58,10 +59,10 @@ function Column({column}) {
       }
   
       // Tạo dữ liệu Card để gọi API
-      // const newCardData = {
-      //   title: newCardTitle,
-      //   columnId: column._id
-      // }
+      const newCardData = {
+        title: newCardTitle,
+        columnId: column._id
+      }
   
       /**
        * Gọi lên props function createNewCard nằm ở component cha cao nhất (boards/_id.jsx)
@@ -69,99 +70,140 @@ function Column({column}) {
        * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
        * - Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
        */
-      // createNewCard(newCardData)
+      createNewCard(newCardData)
   
       // Đóng trạng thái thêm Card mới & Clear Input
       toggleOpenNewCardForm()
       setNewCardTitle('')
     }
 
+  // Xử lý xóa một Column và Cards bên trong nó
+  const confirmDeleteColumn = useConfirm()
+  const handleDeleteColumn = () => {
+    confirmDeleteColumn({
+      title: 'Delete Column?',
+      description: 'This action will permanently delete your Column and its Cards! Are you sure?',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
+      // buttonOrder: ['confirm', 'cancel']
+      // content: 'test content hehe',
+      // allowClose: false,
+      // dialogProps: { maxWidth: 'lg' },
+      // cancellationButtonProps: { color: 'primary' },
+      // confirmationButtonProps: { color: 'success', variant: 'outlined' },
+      // description: 'Phải nhập chữ trungquandev thì mới được Confirm =))',
+      // confirmationKeyword: 'trungquandev'
+    }).then(() => {
+      /**
+       * Gọi lên props function deleteColumnDetails nằm ở component cha cao nhất (boards/_id.jsx)
+       * Lưu ý: Về sau ở học phần MERN Stack Advance nâng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ đưa dữ liệu Board ra ngoài Redux Global Store,
+       * và lúc này chúng ta có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những component cha phía bên trên. (Đối với component con nằm càng sâu thì càng khổ :D)
+       * - Với việc sử dụng Redux như vậy thì code sẽ Clean chuẩn chỉnh hơn rất nhiều.
+       */
+      deleteColumnDetails(column._id)
+    }).catch(() => {})
+  }
+
   return (
-    <div         
-      ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
+    <div ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
       <Box
-         {...listeners}
+        {...listeners}
         sx={{
-          minWidth:'300px',
+          minWidth: '300px',
           maxWidth: '300px',
-          bgcolor: (theme) => (theme.palette.mode==='dark' ? '#333643' : '#ebecf0'),
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333643' : '#ebecf0'),
           ml: 2,
           borderRadius: '6px',
           height: 'fit-content',
           maxHeight: (theme) => `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)})`
         }}
       >
-          {/* Box Column Header */}
-          <Box
-            sx={{
-              height: (theme) => theme.trello.columnHeaderHeight,
-              p: 2,
-              display: 'flex',
-              alignItems:'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <Typography variant='h6' sx = {{fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer'}}>{column?.title}</Typography>
-
-            <Box>
-              <Tooltip 
-              title = "More Options"
-              >
+        {/* Box Column Header */}
+        <Box sx={{
+          height: (theme) => theme.trello.columnHeaderHeight,
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}>
+            {column?.title}
+          </Typography>
+          <Box>
+            <Tooltip title="More options">
               <ExpandMoreIcon
-                  sx={{
-                    color:'text.primary',
-                    cursor: 'pointer'
-                  }}
-                  id="basic-column-dropdown"
-                  aria-controls={open ? 'basic-menu-column-dropdown' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-                  onClick={handleClick}
-                />
-              </Tooltip>
-              <Menu
-                  id="basic-menu-workspaces"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                  MenuListProps={{
-                  'aria-labelledby': 'basic-button-workspaces'
-                  }}
+                sx={{ color: 'text.primary', cursor: 'pointer' }}
+                id="basic-column-dropdown"
+                aria-controls={open ? 'basic-menu-column-dropdown' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleClick}
+              />
+            </Tooltip>
+            <Menu
+              id="basic-menu-column-dropdown"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              onClick={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-column-dropdown'
+              }}
+            >
+              <MenuItem
+                onClick={toggleOpenNewCardForm}
+                sx={{
+                  '&:hover': {
+                    color: 'success.light',
+                    '& .add-card-icon': { color: 'success.light' }
+                  }
+                }}
               >
-                  <MenuItem>
-                      <ListItemIcon><AddCardIcon fontSize="small" /></ListItemIcon>
-                      <ListItemText>Add new card</ListItemText>
-                  </MenuItem>
-                  <MenuItem>
-                      <ListItemIcon><ContentCut fontSize="small" /></ListItemIcon>
-                      <ListItemText>Cut</ListItemText>
-                  </MenuItem>
-                  <MenuItem>
-                      <ListItemIcon><ContentCopy fontSize="small" /></ListItemIcon>
-                      <ListItemText>Copy</ListItemText>
-                  </MenuItem>
-                  <MenuItem>
-                      <ListItemIcon><ContentPaste fontSize="small" /></ListItemIcon>
-                      <ListItemText>Paste</ListItemText>
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem>
-                      <ListItemIcon><DeleteForeverIcon fontSize="small" /></ListItemIcon>
-                      <ListItemText>Remove this column</ListItemText>
-                  </MenuItem>                
-                  <MenuItem>
-                      <ListItemIcon><Cloud fontSize="small" /></ListItemIcon>
-                      <ListItemText>Archive this column</ListItemText>
-                  </MenuItem>
-              </Menu>
-            </Box>
+                <ListItemIcon><AddCardIcon className="add-card-icon" fontSize="small" /></ListItemIcon>
+                <ListItemText>Add new card</ListItemText>
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon><ContentCut fontSize="small" /></ListItemIcon>
+                <ListItemText>Cut</ListItemText>
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon><ContentCopy fontSize="small" /></ListItemIcon>
+                <ListItemText>Copy</ListItemText>
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon><ContentPaste fontSize="small" /></ListItemIcon>
+                <ListItemText>Paste</ListItemText>
+              </MenuItem>
+              <Divider />
+              <MenuItem
+                onClick={handleDeleteColumn}
+                sx={{
+                  '&:hover': {
+                    color: 'warning.dark',
+                    '& .delete-forever-icon': { color: 'warning.dark' }
+                  }
+                }}
+              >
+                <ListItemIcon><DeleteForeverIcon className="delete-forever-icon" fontSize="small" /></ListItemIcon>
+                <ListItemText>Delete this column</ListItemText>
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon><Cloud fontSize="small" /></ListItemIcon>
+                <ListItemText>Archive this column</ListItemText>
+              </MenuItem>
+            </Menu>
           </Box>
+        </Box>
 
-          {/* Box Column List Cards */}
-          <ListCards cards={orderedCards}/>
-    
-          {/* Box Column Footer */}
-          <Box sx={{
+        {/* List Cards */}
+        <ListCards cards={orderedCards} />
+
+        {/* Box Column Footer */}
+        <Box sx={{
           height: (theme) => theme.trello.columnFooterHeight,
           p: 2
         }}>
@@ -231,10 +273,9 @@ function Column({column}) {
               </Box>
             </Box>
           }
-        </Box>          
-      </Box> 
+        </Box>
+      </Box>
     </div>
-     
   )
 }
 
