@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react'
 import Box  from '@mui/material/Box'
 import Column from './Column/Column'
