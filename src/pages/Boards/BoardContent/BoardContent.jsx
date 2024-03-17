@@ -5,8 +5,6 @@ import { mapOrder } from '~/utils/sorts'
 
 import {
   DndContext, 
-  MouseSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   defaultDropAnimationSideEffects,
@@ -14,7 +12,10 @@ import {
   pointerWithin,
   getFirstCollision,
   closestCorners} from '@dnd-kit/core'
-
+import {
+  MouseSensor,
+  TouchSensor
+} from '~/customLibraries/DndKitSensors'
 import { cloneDeep, isEmpty } from 'lodash'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
